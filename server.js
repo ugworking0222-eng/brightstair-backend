@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Amadeus = require('amadeus');
 require('dotenv').config();
+const { carsData, ukLocations } = require('./cars-data.js');
 
 const app = express();
 
@@ -86,6 +87,23 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/travel-bo
 })
 .then(() => console.log('✅ MongoDB Connected'))
 .catch(err => console.error('❌ MongoDB Error:', err));
+// Seed Cars Data
+const seedCars = async () => {
+  try {
+    const count = await Car.countDocuments();
+    if (count === 0) {
+      await Car.insertMany(carsData);
+      console.log('✅ Cars data seeded successfully');
+    }
+  } catch (error) {
+    console.error('❌ Error seeding cars:', error);
+  }
+};
+
+// Call after MongoDB connects
+mongoose.connection.once('open', () => {
+  seedCars();
+});
 
 // ==================== DATABASE MODELS ====================
 
